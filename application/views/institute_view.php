@@ -40,7 +40,7 @@
 
         }*/
         .footer {
-            position: absolute;
+            position: relative;
             right: 0;
             bottom: 0;
             left: 0;
@@ -221,7 +221,7 @@
 
                     alert("Please select atleast one file");
                 }
-                $.post("<?php echo base_url("?c=eaditorsearch&m=validate");?>", {
+                $.post("<?php echo base_url("?c=eadharvester&m=validate");?>", {
                     username: gitUser,
                     repository: repoSel,
                     branch: brSel,
@@ -286,7 +286,7 @@
     <div class="row content">
         <!--Header Logo -->
         <div class="col-sm-2 sidenav">
-            <a href='<?php echo base_url( ); ?>'><img src='https://www.empireadc.org/sites/www.empireadc.org/files/ead_logo.gif' style='width:220px; margin-top: -75px'/></a>
+            <a href='<?php echo base_url(); ?>'></a>
             <!--p><a href="#">Link</a></p>
             <p><a href="#">Link</a></p>
             <p><a href="#">Link</a></p-->

@@ -1,13 +1,10 @@
 <?php
-class eadharvestor extends CI_Controller
+class eadharvester extends CI_Controller
 {
-    public function __construct()
-    {
+
+    function __construct(){
         parent::__construct();
-        session_start();
-
     }
-
 
     public function index()
     {
