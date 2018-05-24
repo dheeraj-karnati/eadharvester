@@ -4,18 +4,16 @@
     <title>EADitor Institutional Repository View</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!--link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"-->
-    <link rel="stylesheet" href="styles/bootstrap.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <!--link rel="stylesheet" href="styles/bootstrap.css"-->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="./styles/main.css" />
-    <link rel="stylesheet" type="text/css" href="./styles/chronlogy.css" />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.debug.js" integrity="sha384-CchuzHs077vGtfhGYl9Qtc7Vx64rXBXdIAZIPbItbNyWIRTdG0oYAqki3Ry13Yzu" crossorigin="anonymous"></script>
+
 
     <!-- Optional theme -->
 
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <style>
         /* Remove the navbar's default margin-bottom and rounded borders */
         .navbar {
@@ -32,48 +30,34 @@
             /*background-color: #f1f1f1;*/
             height: 100%;
         }
-
-        /* Set black background color, white text and some padding */
-/*        .footer {
-            background-color: #555;
-            color: white;
-
-        }*/
-        .footer {
-            position: relative;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            padding: 1rem;
-            background-color: #555;
-            color:white;
-            text-align: center;
+        .panel-heading .accordion-toggle:after {
+            /* symbol for "opening" panels */
+            font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+            content: "\e114";    /* adjust as needed, taken from bootstrap.css */
+            float: right;        /* adjust as needed */
+            color: grey;         /* adjust as needed */
         }
+        .panel-heading .accordion-toggle.collapsed:after {
+            /* symbol for "collapsed" panels */
+            content: "\e080";    /* adjust as needed, taken from bootstrap.css */
+        }
+
         /* On small screens, set height to 'auto' for sidenav and grid */
-        @media screen and (max-width: 767px) {
-            .sidenav {
-                height: auto;
-                padding: 15px;
-            }
-            .row.content {height:auto;}
-        }
-
 
     </style>
     <script>
         $(document).ready(function() {
             $("input#username").change(function () {
-                $('#brsel').empty();
-                $('#reposel').empty();
-                $("#dirsel").empty();
-                $("#fileTable tbody").empty();
-                   document.getElementById("fileTableDiv").style.visibility = "hidden";
-                   document.getElementById("fileTable").style.visibility = "hidden";
+                // $('#brsel').empty();
+                // $('#reposel').empty();
+                // $("#dirsel").empty();
+                document.getElementById("filePanel").style.visibility = "hidden";
+                document.getElementById("fileTable").style.visibility = "hidden";
 
                 var gitUser = document.getElementById("username").value;
 
-               // var gitRepositoryName = document.getElementById("repo").value;
-                if(gitUser != null) {
+                // var gitRepositoryName = document.getElementById("repo").value;
+                if (gitUser != null) {
                     $.ajax({
                         url: "https://api.github.com/users/" + gitUser + "/repos",
                         jsonp: true,
@@ -97,15 +81,16 @@
                     });
                 }
             });
-            $("#reposel").change(function() {
+
+            $("#reposel").change(function () {
                 $('#brsel').empty();
                 $('#dirsel').empty();
                 $("#fileTable tbody").empty();
-                document.getElementById("fileTableDiv").style.visibility = "hidden";
+                document.getElementById("filePanel").style.visibility = "hidden";
                 document.getElementById("fileTable").style.visibility = "hidden";
                 var gitUser = document.getElementById("username").value;
                 var repoSel = this.value;
-                if(repoSel != "select repo") {
+                if (repoSel != "select repo") {
                     $.ajax({
                         // https://api.github.com/repos/:username/:repositoryname/branches
                         url: "https://api.github.com/repos/" + gitUser + "/" + repoSel + "/branches",
@@ -130,15 +115,15 @@
 
             });
 
-            $("#brsel").change(function() {
+            $("#brsel").change(function () {
                 $('#dirsel').empty();
                 $("#fileTable tbody").empty();
-                document.getElementById("fileTableDiv").style.visibility = "hidden";
+                document.getElementById("filePanel").style.visibility = "hidden";
                 document.getElementById("fileTable").style.visibility = "hidden";
                 var gitUser = document.getElementById("username").value;
                 var repoSel = $("#reposel").val();
                 var brSel = this.value;
-                if(brSel != "select branch") {
+                if (brSel != "select branch") {
                     $.ajax({
                         //https://api.github.com/repos/dkarnati174/EADs/git/trees/master
                         url: "https://api.github.com/repos/" + gitUser + "/" + repoSel + "/git/trees/" + brSel,
@@ -164,15 +149,15 @@
                     });
                 }
             });
-            $("#dirsel").change(function() {
+            $("#dirsel").change(function () {
                 var gitUser = document.getElementById("username").value;
                 var repoSel = $("#reposel").val();
                 var brSel = $("#brsel").val();
                 var dirSel = this.value;
                 $("#fileTable tbody").empty();
-                document.getElementById("fileTableDiv").style.visibility = "hidden";
+                document.getElementById("filePanel").style.visibility = "hidden";
                 document.getElementById("fileTable").style.visibility = "hidden";
-                if(dirSel != "select directory") {
+                if (dirSel != "select directory") {
                     $.ajax({
                         //https://api.github.com/repos/dkarnati174/EADs/git/trees/master
                         url: "https://api.github.com/repos/" + gitUser + "/" + repoSel + "/git/trees/" + brSel + ":" + dirSel,
@@ -185,15 +170,16 @@
                                 text: "Select a Directory"
                             }));
                             var i = 1;
-                            document.getElementById("fileTableDiv").style.visibility = "visible";
+                            document.getElementById("filePanel").style.visibility = "visible";
                             document.getElementById("fileTable").style.visibility = "visible";
+
                             $.each(res, function (key, value) {
                                 if (key == "tree") {
                                     $.each(value, function () {
-                                          var link = "https://raw.githubusercontent.com/"+gitUser+"/"+repoSel+"/"+brSel+"/"+dirSel+"/"+this['path']
+                                        var link = "https://raw.githubusercontent.com/" + gitUser + "/" + repoSel + "/" + brSel + "/" + dirSel + "/" + this['path']
                                         $('#fileTable').append('<tr><td>' + i + '</td>' +
 
-                                            '<td><a href="'+link+'">' + this['path'] + '</a></td>'+
+                                            '<td><a href="' + link + '">' + this['path'] + '</a></td>' +
                                             '<td><input type="checkbox" align="center" checked class="form-check-input" name="eadFileSelect" value="' + this['path'] + '"></td></tr>');
                                         i++;
 
@@ -206,6 +192,7 @@
                 }
             });
             $('button#validate').click(function () {
+                var instName = document.getElementById("inst").value;
                 var gitUser = document.getElementById("username").value;
                 var repoSel = $("#reposel").val();
                 var brSel = $("#brsel").val();
@@ -213,28 +200,60 @@
                 var fileList = [];
                 $.each($("input:checked[name='eadFileSelect']"), function () {
                     var filename = this.value;
-                    if(filename.indexOf(".xml") != -1) {
+                    if (filename.indexOf(".xml") != -1) {
                         fileList.push(this.value);
                     }
                 });
-                if(fileList.length == 0){
+                if (fileList.length == 0) {
 
-                    alert("Please select atleast one file");
+                    alert("Please select atleast one EAD file from the selected directory/Make sure that the selected directory has EAD files");
+                } else {
+                    var result = "";
+                    $.post("<?php echo base_url("?c=eadharvester&m=validate");?>", {
+                        institute: instName,
+                        gituserId: gitUser,
+                        repository: repoSel,
+                        branch: brSel,
+                        directory: dirSel,
+                        fileList: JSON.stringify(fileList)
+
+                    }).done(function (response) {
+
+                        document.getElementById("resultPanel").style.visibility = "visible";
+                        document.getElementById("resultTable").style.visibility = "visible";
+
+                        if(response !=""){
+                            var result = JSON.parse(response);
+                         for(var i=0; i< result.length;i++){
+
+                             $('#resultTable').append('<tr><td>' + i+1 + '</td>' +
+
+                                 '<td>'+result[i].file_name +'</td>' +
+                                 '<td>'+result[i].rules_valid+'</td>'+
+                                 '<td>'+ result[i].rules_failed+'</td></tr>');
+                             i++;
+
+                         }
+
+
+                        }else {
+
+
+                        }
+
+
+
+
+
+
+                    });
+
                 }
-                $.post("<?php echo base_url("?c=eadharvester&m=validate");?>", {
-                    username: gitUser,
-                    repository: repoSel,
-                    branch: brSel,
-                    directory: dirSel,
-                    fileList: JSON.stringify(fileList)
-
-                }).done(function (response) {
-
-                    alert(response);
-                });
-
 
             });
+
+
+        });
             $("input#selectall").click(function(event) {
                 if(this.checked) {
                     $(".form-check-input").prop('checked', true);
@@ -243,16 +262,40 @@
 
                 }
             });
-        });
+        function createPdf() {
+            var pdf = new jsPDF('p', 'pt', 'letter');
+
+            source = $('#resultBody')[0];
+
+
+            specialElementHandlers = {
+                '#bypassme': function (element, renderer) {
+                    return true
+                }
+            };
+            margins = {
+                top: 80,
+                bottom: 60,
+                left: 60,
+                width: 522
+            };
+
+            pdf.fromHTML(
+                source,
+                margins.left,
+                margins.top, {
+                    'width': margins.width,
+                    'elementHandlers': specialElementHandlers
+                },
+
+                function (dispose) {
+
+                    pdf.save('EAD_Validation_Results.pdf');
+                }, margins);
+        }
 
 
     </script>
-    <!--script>
-          $(document).ready(function() {
-            $(".fileRow:even").css("background-color","#f2f2f2");
-            $(".fileRow:odd").css("background-color","#ffffff");
-        });
-    </script-->
     <?php
 ?>
 </head>
@@ -260,7 +303,7 @@
 
 
 <nav class="navbar navbar-inverse">
-    <div class="container-fluid">
+    <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
                 <span class="icon-bar"></span>
@@ -282,27 +325,34 @@
         </div>
     </div>
 </nav>
-<div class="container-fluid text-center">
-    <div class="row content">
-        <!--Header Logo -->
+
+<div class = "container">
         <div class="col-sm-2 sidenav">
-            <a href='<?php echo base_url(); ?>'></a>
+            <a href='<?php echo base_url( ); ?>'><img src='https://www.empireadc.org/sites/www.empireadc.org/files/ead_logo.gif' style='width:220px; margin-top: -75px'/></a>
             <!--p><a href="#">Link</a></p>
             <p><a href="#">Link</a></p>
             <p><a href="#">Link</a></p-->
         </div>
-        <div class="col-sm-4 text-right">
-        </div>
-        <!-- Form Content -->
+    <br>
+<div class="col-sm-10" id="content">
+    <h2 align="center">EAD Harvester</h2>
+        <hr>
+<br>
 
-        <div class="col-sm-8 text-left">
+    <div class="panel-group" id="accordion">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#repoSection">
+                        Select a Git Repository
+                    </a>
+                </h4>
+            </div>
+            <!--h4 align="center">Institution's Git Repo</h4>
+            <h4 data-toggle="collapse" data-target="#instInfo" class='infoAccordion accordion active'>Institution's Git Repo  <span class="glyphicon glyphicon-menu-right" style="float:right;"></span></h4-->
 
-
-            <div class="container">
-                <h3>Institution's Git Repo</h3>
-                <hr>
-                <div class="row">
-                    <div class="col-lg-6">
+                <div id="repoSection" class="panel-collapse collapse in">
+                    <div class="panel-body">
                         <div class="form-group">
                             <label>Institution</label>
                             <div class="input-group"> <span class="input-group-addon"><span class="glyphicon glyphicon-home"></span></span>
@@ -337,35 +387,80 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group" id="fileTableDiv" style="visibility: hidden">
-                            <label> List of Files in the selected directory</label>
 
-                        <table class="table table-striped" name="fileTable" id="fileTable" style="visibility: hidden">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>File Name</th>
-                                <th>Selected files <br/> to validate &nbsp;(&nbsp;<input type="checkbox" checked name="eadFileSelect" id="selectall">&nbsp;All</input>&nbsp;)</th>
+            </div>
+                </div>
+                  </div>
 
-                            </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                        </div>
 
-                        <button class="btn btn-primary center-block" type="button" id="validate">Validate</button>
-                    </div>
+        <!--h4 data-toggle="collapse" data-target="#eadList" class='infoAccordion accordion'>List of Files<span class="glyphicon glyphicon-menu-right" style="float:right;"></span></h4>
+
+        <div id="eadList" class="collapse"-->
+        <div id="filePanel" class="panel panel-default" style="visibility: hidden">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#fileSection">
+                        List of Files
+                    </a>
+                </h4>
+            </div>
+            <div id="fileSection" class="panel-collapse collapse in">
+                <div class="panel-body">
+                <table class="table table-striped" name="fileTable" id="fileTable" style="visibility: hidden">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>File Name</th>
+                        <th>Selected files <br/> to validate &nbsp;(&nbsp;<input type="checkbox" checked name="eadFileSelect" id="selectall">&nbsp;All</input>&nbsp;)</th>
+
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <button class="btn btn-primary center-block" type="button" id="validate">Validate</button>
+
+            </div>
+
+
+        </div>
+        </div>
+        <div id="resultPanel" class="panel panel-default" style="visibility: hidden">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#resultSection">
+                        Results
+                    </a>
+                </h4>
+            </div>
+            <div id="resultSection" class="panel-collapse collapse in">
+                <div id="resultBody" class="panel-body">
+                    <table class="table table-striped" name="resultTable" id="resultTable">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>File Name</th>
+                            <th>Rules Passed</th>
+                            <th>Rules Failed</th>
+
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                    <button class="btn btn-primary center-block" onclick="javascript:createPdf();" type="button" id="print">Print Pdf</button>
+                    <h6></h6>
+                </div>
+
+
+            </div>
+        </div>
+        </div>
+
         </div>
 </div>
-            </div>
-</div>
-    </div>
-    </br>
-    <footer class="footer text-center">
-        <p>Footer Text</p>
-
-    </footer>
 </body>
 
 </html>

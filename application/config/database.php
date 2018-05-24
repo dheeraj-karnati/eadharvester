@@ -47,8 +47,8 @@
 
 $active_group = 'default';
 $active_record = TRUE;
-/*
-$db['default']['hostname'] = '';
+
+$db['default']['hostname'] = 'sqlite:'.APPPATH.'db/rsrq.s3db';
 $db['default']['username'] = '';
 $db['default']['password'] = '';
 $db['default']['database'] = '';
@@ -62,6 +62,6 @@ $db['default']['char_set'] = 'utf8';
 $db['default']['dbcollat'] = 'utf8_general_ci';
 $db['default']['swap_pre'] = '';
 $db['default']['autoinit'] = TRUE;
-$db['default']['stricton'] = FALSE;*/
+$db['default']['stricton'] = FALSE;
 /* End of file database.php */
 /* Location: ./application/config/database.php */
