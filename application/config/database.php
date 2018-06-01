@@ -48,7 +48,7 @@
 $active_group = 'default';
 $active_record = TRUE;
 
-$db['default']['hostname'] = 'sqlite:'.APPPATH.'db/rsrq.s3db';
+$db['default']['hostname'] = 'sqlite:'.APPPATH.'db/eadharvester.s3db';
 $db['default']['username'] = '';
 $db['default']['password'] = '';
 $db['default']['database'] = '';
