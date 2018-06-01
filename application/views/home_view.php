@@ -226,7 +226,7 @@
                             var result = JSON.parse(response);
                          for(var i=0; i< result.length;i++){
 
-                             $('#resultTable').append('<tr><td>' + i+1 + '</td>' +
+                             $('#resultTable').append('<tr><td>' + (i+1) + '</td>' +
 
                                  '<td>'+result[i].file_name +'</td>' +
                                  '<td>'+result[i].rules_valid+'</td>'+

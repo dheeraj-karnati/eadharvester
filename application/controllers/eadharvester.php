@@ -21,16 +21,15 @@ class eadharvester extends CI_Controller
          $branch = $_POST['branch'];
          $directory = $_POST['directory'];
          $file_List = json_decode($_POST['fileList'], true);
-         $collection = array();
-         $rules_valid= array();
-         $rules_failed= array();
+
 
          $data["file_list"] = $file_List;
          $num_files = sizeof($file_List);
          $req_id = $this->insert_inst_info($instituteName,$userid, $repository, $branch,$directory, $num_files);
          if($req_id > 0) {
              for ($i = 0; $i < sizeof($file_List); $i++) {
-
+                 $rules_valid= array();
+                 $rules_failed= array();
                  $filename = $file_List[$i];
                  $path_to_file = "https://raw.githubusercontent.com/" . $userid . "/" . $repository . "/" . $branch . "/" . $directory . "/" . $filename;
                  $xml = simplexml_load_file($path_to_file);
