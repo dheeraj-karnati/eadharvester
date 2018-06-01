@@ -231,7 +231,6 @@
                                  '<td>'+result[i].file_name +'</td>' +
                                  '<td>'+result[i].rules_valid+'</td>'+
                                  '<td>'+ result[i].rules_failed+'</td></tr>');
-                             i++;
 
                          }
 
