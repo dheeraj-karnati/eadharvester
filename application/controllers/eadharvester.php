@@ -175,7 +175,7 @@ class eadharvester extends CI_Controller
                      $rules_failed[] = 12;
 
                  }
-                 if(sizeof($rules_valid>0)) {
+                 if(sizeof($rules_valid)>0) {
                      $rules_valid_to_string = implode(",", $rules_valid);
                  }else{
 
