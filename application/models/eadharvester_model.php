@@ -74,5 +74,40 @@ class eadharvester_model extends CI_Model
             return 0;
         }
     }
+
+    public function getRepoValHistory($repo_path){
+
+        $this ->db ->trans_start();
+        $sql = "SELECT request_id FROM institute_request_info WHERE repo_path =  '$repo_path' ORDER BY create_dttm DESC LIMIT 1";
+
+        $results = $this->db->query($sql);
+        if($results != null) {
+            return $results->result();
+        }
+        else{
+
+            return 0;
+        }
+
+    }
+
+    public function getRequestIdByRepo($gituserid, $gitreponame, $repobranch, $branchdir){
+        $this ->db ->trans_start();
+        $sql = "SELECT request_id FROM institute_request_info where git_username='$gituserid' COLLATE NOCASE and git_repo_name='$gitreponame' COLLATE NOCASE and repo_branch='$repobranch' COLLATE NOCASE and branch_dir='$branchdir' COLLATE NOCASE LIMIT 1";
+        $results = $this->db->query($sql);
+        if($results != null) {
+            foreach ($results->result() as $row)
+            return $row -> request_id;
+        }
+        else{
+
+            return 0;
+        }
+
+
+
+
+    }
+
 }
 

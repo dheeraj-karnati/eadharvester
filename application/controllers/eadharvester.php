@@ -20,18 +20,20 @@ class eadharvester extends CI_Controller
          $repository = $_POST['repository'];
          $branch = $_POST['branch'];
          $directory = $_POST['directory'];
+         $subdirectory = $_POST['subdirectory'];
          $file_List = json_decode($_POST['fileList'], true);
-
-
+         $fileMap = json_decode($_POST['fileMap'], true);
          $data["file_list"] = $file_List;
          $num_files = sizeof($file_List);
          $req_id = $this->insert_inst_info($instituteName,$userid, $repository, $branch,$directory, $num_files);
          if($req_id > 0) {
+
              for ($i = 0; $i < sizeof($file_List); $i++) {
                  $rules_valid= array();
                  $rules_failed= array();
                  $filename = $file_List[$i];
-                 $path_to_file = "https://raw.githubusercontent.com/" . $userid . "/" . $repository . "/" . $branch . "/" . $directory . "/" . $filename;
+                 $file_id = $fileMap[$filename];
+                 $path_to_file = "https://raw.githubusercontent.com/" . $userid . "/" . $repository . "/" . $branch . "/" . $directory . "/" .$subdirectory."/". $filename;
                  $xml = simplexml_load_file($path_to_file);
 
                  /* Rule #: Collection Title Validation */
@@ -190,8 +192,9 @@ class eadharvester extends CI_Controller
                      'req_id'   => $req_id,
                      'file_name'    => $filename,
                      'rules_valid'  => $rules_valid_to_string,
-                     'rules_failed'    => $rules_failed_to_string
-                 );
+                     'rules_failed'    => $rules_failed_to_string,
+                      'sha'  => $file_id
+                  );
 
                  $this->load->model('eadharvester_model');
                  $_result = $this->eadharvester_model->insert_val_log($data, 'request_val_log');
@@ -216,6 +219,31 @@ class eadharvester extends CI_Controller
          }
      }
 
+
+
+
+     public function saveRepoDetails(){
+         $gitUserId = $_POST['gituserId'];
+         $repository = $_POST['repository'];
+         $branch = $_POST['branch'];
+         $directory = $_POST['directory'];
+
+         $this->load->model('eadharvester_model');
+         $req_id = $this->eadharvester_model->getRequestIdByRepo($gitUserId,$repository,$branch,$directory);
+
+         if($req_id >0){
+
+             echo $req_id;
+         }else{
+
+             $req_id = $this->insert_inst_info($gitUserId, $repository,$branch , $directory);
+
+         echo $req_id;
+        }
+
+     }
+
+
      public function getValidationResults(){
 
          $req_id =$this -> input -> get('reqId');
@@ -235,6 +263,21 @@ class eadharvester extends CI_Controller
 
      }
 
+
+     public function checkRepoValHistory($repo_path){
+
+         $this->load->model('eadharvester_model');
+         $validation_array = $this -> eadharvester_model -> getRepoValHistory($repo_path);
+         if($validation_array > 0){
+             $validation_list = json_decode(json_encode($validation_array),true);
+             print_r($validation_list);
+
+         }else{
+
+             print_r("");
+         }
+
+     }
 
     /**
      *
@@ -265,29 +308,47 @@ class eadharvester extends CI_Controller
      }
 
 
-public function insert_inst_info($instName,$gitUserId, $repository,$branch , $directory, $num_files){
+public function insert_inst_info($gitUserId, $repository,$branch , $directory, $num_files){
 
     date_default_timezone_set('US/Eastern');
-    $date = date("m/d/Y");
-    $data = array(
-        'institute_name'   => $instName,
-        'git_username'    => $gitUserId,
-        'git_repo_name'  => $repository,
-        'repo_branch'    => $branch,
-        'branch_dir'    => $directory,
-        'num_files'       => $num_files,
-    );
+ //   $date = date("m/d/Y");
+    $current_timestamp = date("Y-m-d H:i:s");
 
-    $this->load->model('eadharvester_model');
-    $_result = $this->eadharvester_model->insert_institute($data, 'institute_request_info');
+/*        $req_id = $this->eadharvester_model->getRequestIdByRepo($gitUserId,$repository,$branch,$directory);
+
+    if($req_id >0){
+
+        $_result = $req_id;
+
+    }else{*/
+
+        $data = array(
+            'git_username'    => $gitUserId,
+            'git_repo_name'  => $repository,
+            'repo_branch'    => $branch,
+            'branch_dir'    => $directory,
+            'num_files'       => $num_files,
+            'create_dttm' => $current_timestamp,
+            'repo_path' => $gitUserId.'/'.$repository.'/'.$branch.'/'.$directory
+        );
+
+        $this->load->model('eadharvester_model');
+        $_result = $this->eadharvester_model->insert_institute($data, 'institute_request_info');
+   // }
+
 
     if($_result > 0){
+
         return $_result;
+
     }else {
 
         return 0;
     }
 }
+
+
+
     public function insert_val_log($req_id,$file, $rules_valid,$rules_failed ){
 
 
@@ -336,7 +397,17 @@ public function insert_inst_info($instName,$gitUserId, $repository,$branch , $di
         }
     }
 
+public function getreqId(){
+    $this->load->model('eadharvester_model');
 
+    $_result = $this->eadharvester_model-> getRequestIdByRepo("dkarnati174", "EA", "master", "finalized");
+    if($_result > 0){
+        echo $_result;
+    }else {
+
+        echo 0;
+    }
+}
 public function insert_user_info()
 {
 
