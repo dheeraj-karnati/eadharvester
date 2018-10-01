@@ -42,264 +42,43 @@
             content: "\e080";    /* adjust as needed, taken from bootstrap.css */
         }
 
-        /* On small screens, set height to 'auto' for sidenav and grid */
+        	.modal {
+    display:    none;
+    position:   fixed;
+    z-index:    1000;
+    top:        0;
+    left:       0;
+    height:     100%;
+    width:      100%;
+    background: rgba( 255, 255, 255, .8 )
+                url('./icons/spinner.gif')
+                50% 50%
+                no-repeat;
+		}
+
+/* When the body has the loading class, we turn
+   the scrollbar off with overflow:hidden */
+body.loading .modal {
+    overflow: hidden;
+}
+
+/* Anytime the body has the loading class, our
+   modal element will be visible */
+body.loading .modal {
+    display: block;
+}
+
+tr#red{
+    background: #b31b1b;
+}
+
 
     </style>
-    <script>
-        $(document).ready(function() {
-            $("input#username").change(function () {
-                // $('#brsel').empty();
-                // $('#reposel').empty();
-                // $("#dirsel").empty();
-                document.getElementById("filePanel").style.visibility = "hidden";
-                document.getElementById("fileTable").style.visibility = "hidden";
-
-                var gitUser = document.getElementById("username").value;
-
-                // var gitRepositoryName = document.getElementById("repo").value;
-                if (gitUser != null) {
-                    $.ajax({
-                        url: "https://api.github.com/users/" + gitUser + "/repos",
-                        jsonp: true,
-                        method: "GET",
-                        dataType: "json",
-                        success: function (res) {
-                            $('#reposel').append($('<option>', {
-                                value: "select repo",
-                                text: "Select your Repository"
-                            }));
-
-                            $.each(res, function () {
-                                $('#reposel').append($('<option>', {
-                                    value: this['name'],
-                                    text: this['name']
-                                }));
-
-
-                            });
-                        }
-                    });
-                }
-            });
-
-            $("#reposel").change(function () {
-                $('#brsel').empty();
-                $('#dirsel').empty();
-                $("#fileTable tbody").empty();
-                document.getElementById("filePanel").style.visibility = "hidden";
-                document.getElementById("fileTable").style.visibility = "hidden";
-                var gitUser = document.getElementById("username").value;
-                var repoSel = this.value;
-                if (repoSel != "select repo") {
-                    $.ajax({
-                        // https://api.github.com/repos/:username/:repositoryname/branches
-                        url: "https://api.github.com/repos/" + gitUser + "/" + repoSel + "/branches",
-                        jsonp: true,
-                        method: "GET",
-                        dataType: "json",
-                        success: function (res) {
-                            $('#brsel').append($('<option>', {
-                                value: "select branch",
-                                text: "Select your Branch"
-                            }));
-                            $.each(res, function () {
-                                $('#brsel').append($('<option>', {
-                                    value: this['name'],
-                                    text: this['name']
-                                }));
-
-                            });
-                        }
-                    });
-                }
-
-            });
-
-            $("#brsel").change(function () {
-                $('#dirsel').empty();
-                $("#fileTable tbody").empty();
-                document.getElementById("filePanel").style.visibility = "hidden";
-                document.getElementById("fileTable").style.visibility = "hidden";
-                var gitUser = document.getElementById("username").value;
-                var repoSel = $("#reposel").val();
-                var brSel = this.value;
-                if (brSel != "select branch") {
-                    $.ajax({
-                        //https://api.github.com/repos/dkarnati174/EADs/git/trees/master
-                        url: "https://api.github.com/repos/" + gitUser + "/" + repoSel + "/git/trees/" + brSel,
-                        jsonp: true,
-                        method: "GET",
-                        dataType: "json",
-                        success: function (res) {
-                            $('#dirsel').append($('<option>', {
-                                value: "select directory",
-                                text: "Select a Directory"
-                            }));
-                            $.each(res, function (key, value) {
-                                if (key == "tree") {
-                                    $.each(value, function () {
-                                        $('#dirsel').append($('<option>', {
-                                            value: this['path'],
-                                            text: this['path']
-                                        }));
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-            $("#dirsel").change(function () {
-                var gitUser = document.getElementById("username").value;
-                var repoSel = $("#reposel").val();
-                var brSel = $("#brsel").val();
-                var dirSel = this.value;
-                $("#fileTable tbody").empty();
-                document.getElementById("filePanel").style.visibility = "hidden";
-                document.getElementById("fileTable").style.visibility = "hidden";
-                if (dirSel != "select directory") {
-                    $.ajax({
-                        //https://api.github.com/repos/dkarnati174/EADs/git/trees/master
-                        url: "https://api.github.com/repos/" + gitUser + "/" + repoSel + "/git/trees/" + brSel + ":" + dirSel,
-                        jsonp: true,
-                        method: "GET",
-                        dataType: "json",
-                        success: function (res) {
-                            $('#dirsel').append($('<option>', {
-                                value: "select directory",
-                                text: "Select a Directory"
-                            }));
-                            var i = 1;
-                            document.getElementById("filePanel").style.visibility = "visible";
-                            document.getElementById("fileTable").style.visibility = "visible";
-
-                            $.each(res, function (key, value) {
-                                if (key == "tree") {
-                                    $.each(value, function () {
-                                        var link = "https://raw.githubusercontent.com/" + gitUser + "/" + repoSel + "/" + brSel + "/" + dirSel + "/" + this['path']
-                                        $('#fileTable').append('<tr><td>' + i + '</td>' +
-
-                                            '<td><a href="' + link + '">' + this['path'] + '</a></td>' +
-                                            '<td><input type="checkbox" align="center" checked class="form-check-input" name="eadFileSelect" value="' + this['path'] + '"></td></tr>');
-                                        i++;
-
-                                    });
-
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-            $('button#validate').click(function () {
-                var instName = document.getElementById("inst").value;
-                var gitUser = document.getElementById("username").value;
-                var repoSel = $("#reposel").val();
-                var brSel = $("#brsel").val();
-                var dirSel = $("#dirsel").val();
-                var fileList = [];
-                $.each($("input:checked[name='eadFileSelect']"), function () {
-                    var filename = this.value;
-                    if (filename.indexOf(".xml") != -1) {
-                        fileList.push(this.value);
-                    }
-                });
-                if (fileList.length == 0) {
-
-                    alert("Please select atleast one EAD file from the selected directory/Make sure that the selected directory has EAD files");
-                } else {
-                    var result = "";
-                    $.post("<?php echo base_url("?c=eadharvester&m=validate");?>", {
-                        institute: instName,
-                        gituserId: gitUser,
-                        repository: repoSel,
-                        branch: brSel,
-                        directory: dirSel,
-                        fileList: JSON.stringify(fileList)
-
-                    }).done(function (response) {
-
-                        document.getElementById("resultPanel").style.visibility = "visible";
-                        document.getElementById("resultTable").style.visibility = "visible";
-
-                        if(response !=""){
-                            var result = JSON.parse(response);
-                         for(var i=0; i< result.length;i++){
-
-                             $('#resultTable').append('<tr><td>' + (i+1) + '</td>' +
-
-                                 '<td>'+result[i].file_name +'</td>' +
-                                 '<td>'+result[i].rules_valid+'</td>'+
-                                 '<td>'+ result[i].rules_failed+'</td></tr>');
-
-                         }
-
-
-                        }else {
-
-
-                        }
-
-
-
-
-
-
-                    });
-
-                }
-
-            });
-
-
-        });
-            $("input#selectall").click(function(event) {
-                if(this.checked) {
-                    $(".form-check-input").prop('checked', true);
-                }else{
-                    $(".form-check-input").prop('checked', false);
-
-                }
-            });
-        function createPdf() {
-            var pdf = new jsPDF('p', 'pt', 'letter');
-
-            source = $('#resultBody')[0];
-
-
-            specialElementHandlers = {
-                '#bypassme': function (element, renderer) {
-                    return true
-                }
-            };
-            margins = {
-                top: 80,
-                bottom: 60,
-                left: 60,
-                width: 522
-            };
-
-            pdf.fromHTML(
-                source,
-                margins.left,
-                margins.top, {
-                    'width': margins.width,
-                    'elementHandlers': specialElementHandlers
-                },
-
-                function (dispose) {
-
-                    pdf.save('EAD_Validation_Results.pdf');
-                }, margins);
-        }
-
-
-    </script>
+  
     <?php
 ?>
 </head>
 <body>
-
 
 <nav class="navbar navbar-inverse">
     <div class="container">
@@ -352,12 +131,12 @@
 
                 <div id="repoSection" class="panel-collapse collapse in">
                     <div class="panel-body">
-                        <div class="form-group">
+                        <!--div class="form-group">
                             <label>Institution</label>
                             <div class="input-group"> <span class="input-group-addon"><span class="glyphicon glyphicon-home"></span></span>
                                 <input type="text" class="form-control" name="institution" id="inst" placeholder="Institution's Name">
                             </div>
-                        </div>
+                        </div-->
                         <div class="form-group">
                             <label>Git User Name</label>
                             <div class="input-group"> <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
@@ -375,27 +154,40 @@
                             <label>Select Branch</label>
                             <div class="input-group"> <span class="input-group-addon"><span class="glyphicon glyphicon-th-list"></span></span>
                                 <select class="form-control" name="branchSelect" id="brsel">
-
                                 </select>
                             </div>
                         </div>
                         <div class="form-group">
+                            <label>Repository Name</label>
+                            <div class="input-group"> <span class="input-group-addon"><span class="glyphicon glyphicon-pencil"></span></span>
+                                <input type="text" class="form-control" name="repository" id="repository" placeholder="Add Repository Name">
+                            </div>
+                        </div> 
+                        <div class="form-group">
+                            <label>Agency Code</label>
+                            <div class="input-group"> <span class="input-group-addon"><span class="glyphicon glyphicon-barcode"></span></span>
+                                <input type="text" class="form-control" name="agencyCode" id="agencyCode" placeholder="Agency Code for the collection">
+                            </div>
+                        </div>    
+                        <!--div class="form-group">
                             <label>Select Directory</label>
                             <div class="input-group"> <span class="input-group-addon"><span class="glyphicon glyphicon-indent-left"></span></span>
                                 <select class="form-control" name="directorySelect" id="dirsel">
                                 </select>
                             </div>
-                        </div>
+                        </div-->
+                        <!--li><input type="checkbox" id="select_all"/> Selecct All</li-->
 
             </div>
                 </div>
                   </div>
-
+                  </br><a href='https://docs.google.com/document/d/1DnOmxlH6jwH_3dNswq_Vcc3W9pdHMjZeID_DfJxHS9Y/edit?usp=sharing' target="_blank" ><button class="btn btn-primary" style="margin-bottom: 20px">VIEW VALIDATION RULES</button></a></br>
+  
 
         <!--h4 data-toggle="collapse" data-target="#eadList" class='infoAccordion accordion'>List of Files<span class="glyphicon glyphicon-menu-right" style="float:right;"></span></h4>
 
         <div id="eadList" class="collapse"-->
-        <div id="filePanel" class="panel panel-default" style="visibility: hidden">
+        <div id="filePanel" class="panel panel-default" style="visibility: hidden; margin-bottom: 20px">
             <div class="panel-heading">
                 <h4 class="panel-title">
 
@@ -403,7 +195,9 @@
                         List of Files
                     </a>
                 </h4>
+               
             </div>
+            <button class="btn btn-primary center-block" type="button" id="validate">Validate</button>
             <div id="fileSection" class="panel-collapse collapse in">
                 <div class="panel-body">
                 <table class="table table-striped" name="fileTable" id="fileTable" style="visibility: hidden">
@@ -411,15 +205,14 @@
                     <tr>
                         <th>#</th>
                         <th>File Name</th>
-                        <th>Selected files <br/> to validate &nbsp;(&nbsp;<input type="checkbox" checked name="eadFileSelect" id="selectall">&nbsp;All</input>&nbsp;)</th>
+                        <th>Selected files <br/> to validate &nbsp;(&nbsp;<input type="checkbox" checked name="eadFileSelect" id="select_all" checked>&nbsp;All</input>&nbsp;)</th>
 
                     </tr>
                     </thead>
                     <tbody>
                     </tbody>
                 </table>
-                <button class="btn btn-primary center-block" type="button" id="validate">Validate</button>
-
+              
             </div>
 
 
@@ -433,6 +226,8 @@
                         Results
                     </a>
                 </h4>
+                <button class="btn btn-primary" onclick="javascript:createPdf();" type="button" id="print">Print Pdf</button>
+               
             </div>
             <div id="resultSection" class="panel-collapse collapse in">
                 <div id="resultBody" class="panel-body">
@@ -449,7 +244,7 @@
                         <tbody>
                         </tbody>
                     </table>
-                    <button class="btn btn-primary center-block" onclick="javascript:createPdf();" type="button" id="print">Print Pdf</button>
+                   
                     <h6></h6>
                 </div>
 
@@ -460,6 +255,300 @@
 
         </div>
 </div>
+<div class="modal"><!-- Place at bottom of page --></div>
+<script>
+
+    $body = $("body");
+    $(document).ajaxStop(function() {
+	    $body.removeClass("loading");
+    });
+
+    $(document).ready(function() {
+        $("input#username").change(function () {
+                // $('#brsel').empty();
+                // $('#reposel').empty();
+                // $("#dirsel").empty();
+                document.getElementById("filePanel").style.visibility = "hidden";
+                document.getElementById("fileTable").style.visibility = "hidden";
+
+                var gitUser = document.getElementById("username").value;
+
+                // var gitRepositoryName = document.getElementById("repo").value;
+                if (gitUser != null) {
+                    $.ajax({
+                        url: "https://api.github.com/users/" + gitUser + "/repos",
+                        jsonp: true,
+                        method: "GET",
+                        dataType: "json",
+                        success: function (res) {
+                            $('#reposel').empty();
+                            $('#reposel').append($('<option>', {
+                                value: "select repo",
+                                text: "Select your Repository"
+                            }));
+
+                            $.each(res, function () {
+                                $('#reposel').append($('<option>', {
+                                    value: this['name'],
+                                    text: this['name']
+                                }));
+
+
+                            });
+                        }
+                    });
+                }
+            });
+
+            $("#reposel").change(function () {
+                $('#brsel').empty();
+                $('#dirsel').empty();
+                $("#fileTable tbody").empty();
+                document.getElementById("filePanel").style.visibility = "hidden";
+                document.getElementById("fileTable").style.visibility = "hidden";
+                var gitUser = document.getElementById("username").value;
+                var repoSel = this.value;
+                if (repoSel != "select repo") {
+                    $.ajax({
+                        // https://api.github.com/repos/:username/:repositoryname/branches
+                        url: "https://api.github.com/repos/" + gitUser + "/" + repoSel + "/branches",
+                        jsonp: true,
+                        method: "GET",
+                        dataType: "json",
+                        success: function (res) {
+                            $('#brsel').append($('<option>', {
+                                value: "select branch",
+                                text: "Select your Branch"
+                            }));
+                            $.each(res, function () {
+                                $('#brsel').append($('<option>', {
+                                    value: this['name'],
+                                    text: this['name']
+                                }));
+
+                            });
+                        }
+                    });
+                }
+
+            });
+
+            $("#brsel").change(function () {
+                var gitUser = document.getElementById("username").value;
+                var repoSel = $("#reposel").val();
+                var brSel = this.value;
+               // var dirSel = this.value;
+                $("#fileTable tbody").empty();
+                document.getElementById("filePanel").style.visibility = "hidden";
+                document.getElementById("fileTable").style.visibility = "hidden";
+               // if (dirSel != "select directory") {
+                    $.ajax({
+                        //https://api.github.com/repos/dkarnati174/EADs/git/trees/master
+                        url: "https://api.github.com/repos/" + gitUser + "/" + repoSel + "/git/trees/" + brSel,
+                        jsonp: true,
+                        method: "GET",
+                        dataType: "json",
+                        success: function (res) {
+                           /* $('#dirsel').append($('<option>', {
+                                value: "select directory",
+                                text: "Select a Directory"
+                            }));*/
+                            var i = 1;
+                            document.getElementById("filePanel").style.visibility = "visible";
+                            document.getElementById("fileTable").style.visibility = "visible";
+                            $('#filePanel').show();
+
+                            $.each(res, function (key, value) {
+                                if (key == "tree") {
+                                    $.each(value, function () {
+                                        var link = "https://raw.githubusercontent.com/" + gitUser + "/" + repoSel + "/" + brSel + "/" + "/" + this['path']
+                                        $('#fileTable').append('<tr><td>' + i + '</td>' +
+                                            '<td><a href="' + link + '" target="_blank">' + this['path'] + '</a></td>' +
+                                            '<td><input type="checkbox" align="center" checked class="form-check-input" name="eadFileSelect" value="' + this['path'] + '"></td></tr>');
+                                        i++;
+
+                                    });
+
+                                }
+                            });
+                        }
+                    });
+              //  }
+            });
+         /*   $("#dirsel").change(function () {
+                var gitUser = document.getElementById("username").value;
+                var repoSel = $("#reposel").val();
+                var brSel = $("#brsel").val();
+                var dirSel = this.value;
+                $("#fileTable tbody").empty();
+                document.getElementById("filePanel").style.visibility = "hidden";
+                document.getElementById("fileTable").style.visibility = "hidden";
+                if (dirSel != "select directory") {
+                    $.ajax({
+                        //https://api.github.com/repos/dkarnati174/EADs/git/trees/master
+                        url: "https://api.github.com/repos/" + gitUser + "/" + repoSel + "/git/trees/" + brSel + ":" + dirSel,
+                        jsonp: true,
+                        method: "GET",
+                        dataType: "json",
+                        success: function (res) {
+                            $('#dirsel').append($('<option>', {
+                                value: "select directory",
+                                text: "Select a Directory"
+                            }));
+                            var i = 1;
+                            document.getElementById("filePanel").style.visibility = "visible";
+                            document.getElementById("fileTable").style.visibility = "visible";
+
+                            $.each(res, function (key, value) {
+                                if (key == "tree") {
+                                    $.each(value, function () {
+                                        var link = "https://raw.githubusercontent.com/" + gitUser + "/" + repoSel + "/" + brSel + "/" + dirSel + "/" + this['path']
+                                        $('#fileTable').append('<tr><td>' + i + '</td>' +
+
+                                            '<td><a href="' + link + '">' + this['path'] + '</a></td>' +
+                                            '<td><input type="checkbox" align="center" checked class="form-check-input" name="eadFileSelect" value="' + this['path'] + '"></td></tr>');
+                                        i++;
+
+                                    });
+
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+            */
+
+            $('button#validate').click(function () {
+                if ($('#repository').val() != ''){
+                  
+                    if($('#agencyCode').val() != ''){
+    
+                        var gitUser = document.getElementById("username").value;
+                        var repoSel = $("#reposel").val();
+                        var brSel = $("#brsel").val();
+                        var acode = $("#agencyCode").val();
+                        var repoName = $("#repository").val();
+                        //var dirSel = $("#dirsel").val();
+                        $("#resultTable tbody").empty();
+                        var fileList = [];
+                        $.each($("input:checked[name='eadFileSelect']"), function () {
+                                var filename = this.value;
+                            if (filename.indexOf(".xml") != -1) {
+                                fileList.push(this.value);
+                            }
+                        });
+
+                        if (fileList.length == 0) {
+
+                            alert("Please select atleast one EAD file from the selected directory/Make sure that the selected directory has EAD files");
+                
+                        } else {
+                            
+                            //loading spinner gif
+                            $("body").addClass("loading");
+                            var result = "";
+                            
+                            $.post("<?php echo base_url("?c=eadharvester&m=validate");?>", {
+                                //  institute: instName,
+                                gituserId: gitUser,
+                                repository: repoSel,
+                                branch: brSel,
+                                agencyCode: acode,
+                                repoName: repoName,
+                                //directory: dirSel,
+                                fileList: JSON.stringify(fileList)
+
+                            }).done(function (response) {
+
+                                document.getElementById("resultPanel").style.visibility = "visible";
+                                document.getElementById("resultTable").style.visibility = "visible";
+                                
+                                if(response !=""){
+                                    var result = JSON.parse(response);
+                                    $('#filePanel').hide();
+                                    
+                                    for(var i=0; i< result.length;i++){
+                                        // Change row background to red if rules failed.                                         
+                                        var color = 'white';
+                                        if(result[i].rules_failed != ' '){
+                                            color = 'red';
+                                        }
+
+                                        var link = "https://raw.githubusercontent.com/" + gitUser + "/" + repoSel + "/" + brSel + "/" + "/" + result[i].file_name;
+                                                              
+                                        $('#resultTable').append('<tr id="'+ color +'"><td>' + (i+1) + '</td>' +
+                                            '<td><a href="' + link + '" target="_blank">' + result[i].file_name + '</a></td>' + 
+                                            '<td>'+result[i].rules_valid+'</td>'+
+                                            '<td>'+ result[i].rules_failed+'</td></tr>');
+                                    }
+                                }else {
+                                      alert('Technical issue with the results. Please refresh and try again or contact Administrator!')  
+                                 }
+                            });
+                        }
+
+                    }else{
+                        alert('Missing Agency Code');
+                    }
+              
+                }else{
+                    alert('Missing Repository Name');
+                }
+              
+            });
+        });
+           
+        function createPdf() {
+            var pdf = new jsPDF('p', 'pt', 'letter');
+
+            source = $('#resultBody')[0];
+
+
+            specialElementHandlers = {
+                '#bypassme': function (element, renderer) {
+                    return true
+                }
+            };
+            margins = {
+                top: 80,
+                bottom: 60,
+                left: 60,
+                width: 522
+            };
+
+            pdf.fromHTML(
+                source,
+                margins.left,
+                margins.top, {
+                    'width': margins.width,
+                    'elementHandlers': specialElementHandlers
+                },
+
+                function (dispose) {
+
+                    pdf.save('EAD_Validation_Results.pdf');
+                }, margins);
+        }
+
+       $("button#download").click(function(){
+            $.post("<?php echo base_url("?c=eadharvester&m=downloadFiles");?>", {
+                   
+            }).done(function (response) {
+                alert('Done');
+            });
+       }); 
+
+      $("#select_all").change(function() {
+            if(this.checked) {
+                $(".form-check-input").prop('checked', true);
+            }else{
+                $(".form-check-input").prop('checked', false);
+                }
+                //alert('Monish');
+        });
+</script>
+
 </body>
 
 </html>
